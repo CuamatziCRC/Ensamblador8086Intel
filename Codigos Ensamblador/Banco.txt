@@ -1,0 +1,94 @@
+package Banco;
+
+ class CuentaBancaria {
+	 double cuenta=0,saldo=0;
+	 float interes;
+	 public CuentaBancaria(){
+		 this.cuenta=0;
+		 this.saldo=0;
+		 this.interes=0;
+		 
+	 }
+	 public CuentaBancaria(double saldo,float interes ){
+		 this.saldo= saldo;
+		 this.interes= interes;
+		 
+	 }
+	 public  void cuenta(double cuenta){
+		 this.cuenta=cuenta;
+	 }
+	 public void actualizarSaldo(double ahorro){
+		 saldo=ahorro;
+	 }
+	 public void ingresar(double ingresar){
+		 
+		 saldo=saldo+ingresar;
+		 
+	 }
+	 public void retirar(double retirar){
+		 saldo=saldo-retirar;
+	 }
+	 public void consulta(){System.out.println("El saldo es de ...$"+saldo);}
+	 public void informacion(){
+		 System.out.println("Cuenta ="+cuenta);
+		 double totaal=saldo-(saldo*.3/365);
+		 System.out.println("Saldo total $"+totaal);
+	 }
+}
+
+package Banco;
+import java.util.Scanner;
+import java.util.Random;
+public class Cuenta {
+		private static Scanner leer;
+		//private static int opcion;
+		public static void menu(){
+			System.out.println("Bienvenido a su banco de preferencia"); 
+			System.out.println("1)Consultar saldo e informacion");
+			System.out.println("2)Depositar a su cuenta"); 
+			System.out.println("3)Retirar de su cuenta");
+			System.out.println("4)salir"); 
+			System.out.println("Elija su opcion...");
+		}
+	public static void main(String[] args) {
+		leer = new Scanner(System.in);
+		Random rnd = new Random();
+		double cuenta=0;
+		int sal=0;
+		cuenta=(int)(rnd.nextDouble() * 6000000 + 1000000);
+		CuentaBancaria uno= new CuentaBancaria();
+		uno.cuenta(cuenta);
+		System.out.println("Bienvenido a su banco de preferencia"); 
+		System.out.println("su numero de cuenta es..."+cuenta);
+		do{
+			int opcion = 0;
+			menu();
+			opcion=leer.nextInt();
+			
+			switch(opcion){
+			case 1:uno.consulta();
+			uno.informacion();
+				break;
+			case 2: 
+			double aux=0;
+			System.out.println("Cuanto desea depositar");
+			aux=leer.nextDouble();
+			uno.ingresar(aux);
+			System.out.println("Su deposito fue un exito");
+				break;
+			case 3:
+				double aux2=0;
+				System.out.println("Cuanto desea retirar");
+				aux2=leer.nextDouble();
+				uno.retirar(aux2);
+				
+				break;
+			
+			default: System.out.println("Opcion invalida o esta fuera del rango");
+			}
+			
+		}while(sal!=4);
+		
+	}
+
+}

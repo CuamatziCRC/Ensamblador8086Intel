@@ -1,0 +1,451 @@
+;------------------------------------------------------------------------------
+;Definicion de Macros
+;------------------------------------------------------------------------------
+
+;Macro de lectura
+read macro cadena        
+LEA DX,cadena
+mov ah,0ah
+int 21h
+endm
+;Macro escribir f's
+menur macro
+local et1
+et1:cursor       ;posicion del cursor
+mov ah,09h      ;funcion de escribir caracteres con atributos
+mov bh,0h         ;no pag.
+mov cont,cx       ;
+mov cx,1h         ;no de caracteres
+mov bl,74h         ;atributo
+mov al,[si]        ;recorrer como vector
+int 10h
+inc si
+inc col
+mov cx,cont       ;no de repetion de car.
+loop et1
+endm
+ ;Macro escribir opc
+menua macro
+local et1
+et1:cursor
+mov ah,09h      ;llama la instru.
+mov bh,0h        ;pagina
+mov cont,cx
+mov cx,1h        
+mov bl,71h       ;atributo
+mov al,[si]      ;recorrer como vector
+int 10h
+inc si
+inc col
+mov cx,cont      ;repeticiones
+loop et1
+endm
+
+ ;Posicionar el cursor
+cursor macro
+mov ah,02
+mov bh,0
+mov dh,ren
+mov dl,col
+int 10h
+endm
+
+;------------------------------------------------------------------------------
+;Definicion del segmento de datos
+;------------------------------------------------------------------------------
+DATOS SEGMENT
+     cur db 0
+     cantidad db 0
+     col db 0
+     ren db 0
+     cont dw 0
+     cad1 db 'F1 ','$' ;3h
+     cad2 db 'Editar  ','$';8h
+     
+     cad3 db 'F2 ','$'
+     cad4 db 'Contar ','$'  ;7h
+     
+     cad5 db 'F3 ','$'
+     cad6 db 'Sustituir ','$';10 
+     
+     cad7 db 'F4 $'      ;3h
+     cad8 db 'Mayusculas ',' $' ;11
+      
+     cad9 db  'F5 ','$'   ;3h
+     cad10 db 'Fin de edicion ','$' ;15
+     
+     cad11 db 'Esc $' ;4h
+     cad12 db 'Salir$';5h 
+     
+     cad13 db 'Introduce una cadena =','$'  
+     
+     cad14 db 'Introduce sub-cadena a buscar: ','$'   
+     
+     cad15 db 'Apariciones: ','$'   
+     
+     cad16 db 'Introduce dos sub-cadenas de la misma longitud','$' 
+     
+     cad17 db 'Sub-cadena 1: ','$'
+     
+     cad18 db 'Sub-cadena 2: ','$'
+     
+     cad19 db 'Deben ser de la MISMA longitud','$'   
+     cadena DB 64H DUP (?) ;SE DECLARA LA VARIABLE "PALABRA" DE TAMAÑO 100 (64H)
+     cadena1 label byte
+     longmax1 db 31
+     longact1 db 0
+     buffer1 db 31 dup('$')
+
+     cadena2 label byte
+     longmax2 db 31
+     longact2 db 0
+     buffer2 db 31 dup('$')
+
+     cadena3 label byte
+     longmax3 db 31
+     longact3 db 0
+     buffer3 db 31 dup('$')
+
+DATOS ENDS
+                
+;------------------------------------------------------------------------------
+;Definicion del segmento de pila
+;------------------------------------------------------------------------------
+PILA SEGMENT STACK "STACK"
+     db 40h DUP(0)
+PILA ENDS
+
+;------------------------------------------------------------------------------
+;Definicion del segmento extra
+;------------------------------------------------------------------------------
+EXTRA SEGMENT
+     RESULT DW 0,0
+EXTRA ENDS
+
+;------------------------------------------------------------------------------
+;Definicion del segmento de codigo
+;------------------------------------------------------------------------------
+codigo segment para 'code'
+     principal proc far
+       assume cs:codigo,ds:datos,ss:pila
+       push ds
+       sub ax,ax
+       push ax
+       mov ax,datos
+       mov ds,ax
+       mov es,ax
+
+
+;------------------------------------------------------------------------------
+;Empezamos el codigo
+;------------------------------------------------------------------------------ 
+etin:call LIMPANT
+       mov col,0
+       mov ren,0
+       cursor
+       LEA SI,cad1  ;f1
+       mov cx,03h   ;en h por que son el numero de caracteres
+       menur  ;rojo
+
+       LEA SI,cad2
+       mov cx,08h   ;en h por que son el numero de caracteres
+       menua  ;azul
+
+       LEA SI,cad3  ;f2
+       mov cx,03h    ;en h por que son el numero de caracteres
+       menur ;rojo
+
+       LEA SI,cad4
+       mov cx,07h    ;en h por que son el numero de caracteres
+       menua  ;azul
+
+       LEA SI,cad5  ;f3
+       mov cx,03h    ;en h por que son el numero de caracteres
+       menur ;rojo
+
+       LEA SI,cad6   
+       mov cx,0ah    ;en h por que son el numero de caracteres
+       menua  ;azul
+
+       LEA SI,cad7   ;f4
+       mov cx,03h     ;en h por que son el numero de caracteres
+       menur  ;rojo
+
+       LEA SI,cad8
+       mov cx,11
+       menua  ;azul
+       
+       
+       LEA SI,cad9   ;f5
+       mov cx,03h    ;en h por que son el numero de caracteres
+       menur  ;rojo
+
+       LEA SI,cad10
+       mov cx,0fh      ;en h por que son el numero de caracteres
+       menua  ;azul
+       
+       LEA SI,cad11   ;esc
+       mov cx,04h      ;en h por que son el numero de caracteres
+       menur  ;rojo
+
+       LEA SI,cad12
+       mov cx,5h        ;en h por que son el numero de caracteres
+       menua  ;azul  
+;____________________Fin del Menu--------
+;____________________leer F?_____________
+       mov ah,10h
+       int 16h     
+;------------------------------------------------------------------------------
+;Checar que f? es...
+;------------------------------------------------------------------------------        
+       cmp ah,3Bh    ;es f1?
+       je et2
+       cmp ah,3ch     ;Esf2?
+       je et3
+       cmp ah,3dh     ;es f3?
+       je et4
+       cmp ah,3eh      ;es f4?
+       je et5
+       cmp ah,3fh    ;esf5?
+       je etiqueta6
+        cmp ah,1bh    ;es esc
+        je etiqueta7
+;------------------------------------------------------------------------------
+;Checar que f? fue...
+;------------------------------------------------------------------------------         
+        
+        
+       et2:call LEER1   ;f1
+       jmp etin
+       et3:call LEER2    ;f2;
+       jmp etin
+       et4:call LEER3    ;f3
+       jmp etin 
+       et5:call LEER4    ;f4
+       jmp etin 
+         etiqueta6:RET    ;f5 fin de edicion
+        jmp etin
+  
+    
+;_______________finalizar programa  
+     etiqueta7:mov ax,4c00h
+     int 21h    
+     principal endp
+;------------------------------------------------------------------------------
+;Finaliza el programa
+;------------------------------------------------------------------------------          
+                    
+     LIMPANT proc
+       cursor
+       mov ah,06h
+       mov al,0
+       mov cx,0000h
+       mov dx,184fh
+       mov bh,0fh
+       int 10h
+       RET
+     LIMPANT endp
+;------------------------------------------------------------------------------
+;Funciones...(LEERN)
+;------------------------------------------------------------------------------ 
+
+;------------------------------------------------------------------------------
+;      Funcion LEER
+;------------------------------------------------------------------------------        
+       
+       LEER1 proc
+       mov col,0
+       inc ren
+       cursor
+       mov ah,09h
+       LEA DX,cad13    ;escribir una linea
+       int 21h
+       read cadena;leemos cadena
+       RET
+     LEER1 endp
+;------------------------------------------------------------------------------
+;      Funcion Contar
+;------------------------------------------------------------------------------  
+     LEER2 proc
+       mov col,0
+       inc ren
+       cursor
+       mov ah,09h  ;escribe una linea
+       LEA DX,cad14   ;mensaje de la subcadena
+       int 21h
+       read cadena2   ;macro leer cad2
+       call contar     ;funcion contar
+       mov col,0
+       inc ren
+       cursor
+       mov ah,09h
+       LEA DX,cad15;cadena a escribir
+       int 21h
+       add cantidad,30h
+       mov ah,2       ;escribir caracter
+       mov dl,cantidad
+       int 21h
+       mov ah,1      ;leer y escribir un caracter
+       int 21h
+       RET
+     LEER2 endp
+;------------------------------------------------------------------------------
+;      Funcion Sustituir
+;------------------------------------------------------------------------------  
+     LEER3 proc
+       et12:mov col,0
+       inc ren
+       cursor
+       mov ah,09h  ;escribir una cadena
+       LEA DX,cad16
+       int 21h
+       mov col,0
+       inc ren
+       cursor
+       mov ah,09h   ;escribir mensaje
+       LEA DX,cad17
+       int 21h
+       read cadena2  ;macro leercad2
+       mov col,0
+       inc ren
+       cursor
+       mov ah,09h    ;,escribir el mensaje
+       LEA DX,cad18
+       int 21h
+       read cadena3    ;macro leercad3
+       mov ah,longact2
+       mov al,longact3
+       cmp ah,al       ;si son del mismo tamanio
+       jne et11
+       call sustituir
+       mov ah,1         ;leer y escribir un caracter
+       int 21h
+       RET
+       et11:mov col,0
+       inc ren
+       cursor
+       mov ah,09h
+       LEA DX,cad19
+       int 21h
+       jmp et12
+     LEER3 endp
+;------------------------------------------------------------------------------
+;      Funcion Mayusculas
+;------------------------------------------------------------------------------  
+
+LEER4   proc
+    lea si, cadena 
+    inicio:
+    cmp cadena[si],'$'  
+    je finpalabra
+    cmp cadena[si],61h 
+    
+
+ LEER4 endp
+
+;------------------------------------------------------------------------------
+;      Funcion contar
+;------------------------------------------------------------------------------  
+     contar proc
+          mov cantidad,0
+          mov dl,longact2
+          dec dl
+          LEA SI,buffer1
+          LEA DI,buffer2
+          mov cx,30
+          et6:mov ah,[SI]
+          mov al,[DI]
+          cmp ah,al
+          je et7
+          et8:add SI,01
+          loop et6
+          RET
+
+          et7:push si
+          push di
+          mov dh,00
+          et9:inc dh
+          cmp dh,dl
+          jg et10 
+          add si,01
+          add di,01
+          mov ah,[si]
+          mov al,[di]
+          cmp ah,al
+          je et9
+          pop di
+          pop si
+          jmp et8
+          et10:add cantidad,01
+          pop di
+          pop si
+          jmp et8
+     contar endp
+;------------------------------------------------------------------------------
+;      Funcion sustituir
+;------------------------------------------------------------------------------  
+     sustituir proc
+          mov dl,longact2
+          dec dl
+          LEA SI,buffer1
+          LEA DI,buffer2
+          mov cx,30
+          et26:mov ah,[SI]
+          mov al,[DI]
+          cmp ah,al
+          je et27
+          et28:add SI,01
+          loop et26
+
+          inc ren
+          mov col,0
+          cursor
+          mov ah,09h
+          LEA DX,buffer1
+          int 21h
+
+          RET
+
+          et27:push si
+          push di
+          push si
+          push di
+          mov dh,00
+          et29:inc dh
+          cmp dh,dl
+          jg et210 
+          add si,01
+          add di,01
+          mov ah,[si]
+          mov al,[di]
+          cmp ah,al
+          je et29
+          pop di
+          pop si
+          pop di
+          pop si
+          jmp et28
+          et210:pop di
+          pop si
+          mov cont,cx
+          inc dl
+          mov cl,dl
+          LEA DI,buffer3
+          et211:mov ah,[di]
+          mov [si],ah
+          inc si
+          inc di
+          loop et211
+          mov cx,cont
+          pop di
+          pop si
+          dec dl
+          jmp et28
+     sustituir endp
+     
+    
+codigo ends
+     end principal
+                    
+
+;;;;;;;idea

@@ -1,0 +1,128 @@
+class Conjunto{
+	private String[] c;
+	Conjunto (){
+		c=null;
+	}
+	Conjunto (String[] cad){
+		c=cad;
+	}
+	Conjunto union(Conjunto b){
+		Conjunto aux=new Conjunto(new String[c.length+b.c.length]);
+		int d;
+		for (d=0;d<c.length;d++)
+			aux.c[d]=c[d];
+		for (d=0;d<b.c.length;d++)
+			aux.c[c.length+d]=b.c[d];
+		return aux;
+	}
+	Conjunto interseccion(Conjunto b){
+		Conjunto aux;
+		int i=0,a=0,m,n;
+		for(n=0;n<c.length;n++){
+			i=0;
+			for(m=0;m<b.c.length;m++){
+				if(c[n].compareTo(b.c[m])==0){
+					i++;
+				}
+			}
+			if(i>0){
+				a++;
+			}
+		}
+		if(a==0){
+			aux=new Conjunto(new String[1]);
+			return aux;
+		}
+		aux=new Conjunto(new String[a]);
+		a=0;
+		for(n=0;n<c.length;n++){
+			i=0;
+			for(m=0;m<b.c.length;m++){
+				if(c[n].compareTo(b.c[m])==0){
+					i++;
+				}
+			}
+			if(i>=1){
+				aux.c[a]=c[n];
+				a++;
+			}
+		}
+		return aux;
+	}
+	Conjunto diferencia(Conjunto b){
+		Conjunto f;
+		int i=0,m,n,a=0;
+		for(n=0;n<c.length;n++){
+			i=0;
+			for(m=0;m<b.c.length;m++)
+				if(c[n].compareTo(b.c[m])==0)
+					i++;
+			if(i>0)
+				a++;
+		}
+		Conjunto aux=new Conjunto(new String[c.length-a]);
+		a=0;
+		for(n=0;n<c.length;n++){
+			i=0;
+			for(m=0;m<b.c.length;m++){
+				if(c[n].compareTo(b.c[m])==0){
+					i++;
+			}
+		}
+		    if(i==0){
+		    	aux.c[a]=c[n];
+		         a++;
+		    }
+		}
+		return aux;
+	}
+	void buscar(String s){
+		int i;
+		if(c!=null)
+			for(i=0;i<c.length;i++)
+				if(c[i].compareTo(s)==0)
+					System.out.println("El elemento "+s+" existe el conjunto");
+		System.out.println();
+
+	}
+	Conjunto insertar(String s){
+		int a;
+		Conjunto aux=new Conjunto(new String[c.length+1]);
+		for (a=0;a<c.length;a++)
+			aux.c[a]=c[a];
+		aux.c[c.length]=s;
+		return aux;
+	}
+	Conjunto eliminar(String s){
+		Conjunto aux;
+		int a,b=0,d=0;
+		for(a=0;a<c.length;a++){
+			if(c[a].compareTo(s)==0){
+				d++;
+			}
+		}
+		if(d==0){
+			aux=new Conjunto(new String[c.length]);
+			for(a=0;a<c.length;a++)
+				aux.c[a]=c[a];
+			return aux;
+		}
+		aux= new Conjunto(new String[c.length-1]);
+		d=0;
+		for (a=0;a<c.length;a++)
+			if(c[a].compareTo(s)==0 && d==0){
+				d++;
+			}else{
+				aux.c[b]=c[a];
+				b++;
+			}
+		return aux;
+	}
+	void imprimir(){
+		int i=0;
+		if(c!=null)
+			for(i=0;i<c.length;i++)
+				System.out.println(c[i]);
+			System.out.println();
+	}
+}

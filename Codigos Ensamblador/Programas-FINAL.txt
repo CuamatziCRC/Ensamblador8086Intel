@@ -1,0 +1,137 @@
+mov bx,0
+mov ax,0
+mov si,201
+mov cl,´200+
+mov bl,´si+
+add ax,bx
+inc si
+loop 10d
+mov ´si+,ax
+int 20
+
+
+SUMA 10 NUMEROS
+
+MOV     BX,0000
+MOV     BX,0000
+MOV     AX,0000
+MOV     CX,0000
+MOV     CL,01
+MOV     CH,0A
+MOV     DX,0000
+MOV     AH,00
+CMP     CL,CH
+JG      0020
+ADD     AH,´BX+
+INC     CL
+INC     BX
+JMP     0015
+MOV     ´BX+,AH
+NOP
+NOP
+NOP
+
+----------------------------------------------------------------------------
+SUMA DE UN ARREGLO DE N NUMEROS
+TOMA EL TAMAÑO N DE LA PRIMERA CASILLA
+LA SUMA INICIA EN LA SEGUNDA CASILLA Y EL RESULTADO
+ES INSERTADO EN LA CASILLA N+1 (AL FINAL DEL ARREGLO DE N NUMEROS).
+
+MOV     BX,0000
+MOV     BX,0201
+MOV     AX,0000
+MOV     CX,0000
+MOV     CL,01
+MOV     CH,´200+
+MOV     DX,0000
+MOV     Ah,00
+CMP     CL,CH
+JG      0122
+ADD     Ax,´BX+
+INC     CL
+INC     BX
+JMP     0117
+MOV     ´BX+,Ax
+int 20
+
+---------------------------------------------------------------------------------
+CUENTA EL NUMERO DE CEROS DE UN ARREGLO DE N NUMEROS
+TOMA EL TAMAÑO N DE LA PRIMERA CASILLA
+LA CUENTA INICIA EN LA SEGUNDA CASILLA Y EL RESULTADO
+ES INSERTADO EN LA CASILLA N+1 (AL FINAL DEL ARREGLO DE N NUMEROS).
+
+MOV     BX,0000
+MOV     BX,0251
+MOV     AX,0000
+MOV     CX,0000
+MOV     DX,0000
+MOV 	SI,0000
+MOV     CL,01
+MOV     CH,´0250
+MOV     AH,00
+CMP     CL,CH
+JG      22c
+CMP     AH,´BX
+JE	227
+INC     CL
+INC     BX
+JMP     021A
+ADD     SI,01
+JMP     0222
+MOV     ´BX+,SI
+int 20
+--------------------------------------------------------------------------------------
+SUMA UN ARREGLO DE NUMEROS HASTA ENCONTRAR UN CERO,EN LA CASILLA SIGUIENTE AL CERO
+ALMACENA LA SUMA DE LOS NUMEROS,DESPUES DE LA SUMA INSERTA EL PROMEDIO
+Y EN LA SIGUIENTE EL TOTAL DE NUMEROS SUMADOS.
+
+mov dx,00
+mov cx,00
+mov cl,01
+mov ax,00
+mov si,300
+mov bx,00
+cmp dx,´si+
+je 11e
+mov bl,´si+
+add ax,bx
+inc si
+inc cl
+jmp 111
+inc si
+mov ´si+,ax
+dec cl
+div cl
+inc si
+inc si
+mov ´si+,ax
+inc si
+mov ´si+,cl
+int 20
+
+Elabore análisis de datos, análisis de restricciones, algoritmo, prueba de escritorio,
+asociación de variables, memoria y registros, codificación en ensamblador y
+prueba del código, para un programa que:
+- Cuente número de vocales existentes en una cadena.
+- Deberá contar mayúsculas y minúsculas.
+- La cadena estará almacenada en la dirección 251, el número de caracteres de
+la cadena en la localidad 250, el número de vocales minúsculas deberá ser
+almacenado en memoria, a continuación de la cadena y en la siguiente
+localidad el número de vocales mayúsculas.
+
+mov ax,00
+mov bx,00
+mov cx,00
+mov dx,00
+mov si,01
+mov cl,`250+
+mov bx,251
+cmp bl,41
+je 11b
+inc bx
+jmp 116
+inc bx
+inc si
+loop 116
+mov `bx+,si
+int 20

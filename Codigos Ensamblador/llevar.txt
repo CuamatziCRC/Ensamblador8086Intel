@@ -1,0 +1,145 @@
+;Armando Rosales Maza           Id=15
+title Movimientos del cursor solo hasta los limites de la pantalla
+
+pila segment para STACK 'stack'
+	db 64 dup (0)
+pila ends
+
+	codesg segment
+
+	assume cs:codesg,ss:pila
+		
+		main proc far
+		
+		limpiar_pantalla:
+				mov ax, 0600h
+	            mov bh, 07h
+				mov ch, 00H
+				mov cl, 00H
+				mov dh, 24H
+				mov dl, 79H
+				int 10h
+		
+		
+		iniciar:
+			
+			mov ah,02h		;peticion para colocar el cursor
+			mov bh,00h		;Numero de pagina 0
+			mov dh,0ch		;Renglon  Tiene 25 ( De 00 a 18)
+			mov dl,28h		;Columna  Tiene 80( De 00 a 4F)
+			int 10h			;Coloca el cursor en medio de la pantalla dx,0c28H
+			
+		leer_caracter:
+		 	mov ah,10h
+			int 16h
+			
+		;-----------------------------------------------------------------
+		
+		comparaciones_principales:
+		
+			cmp ax,011bh		;Si la tecla pulsada es ESC, entonces salir del programa
+			je fin
+			
+			cmp al,0e0h			;Si la tecla pulsada es una de direccionamiento saltar a validar flechas
+			je validar_flechas
+			
+			jmp leer_caracter		;Si no es ninguna de la anteriores salta a leer caracter
+		;-----------------------------------------------------------------
+		
+		fin:
+			mov ah,4ch
+			int 21h
+			
+		;-----------------------------------------------------------------
+		
+		validar_flechas:
+			cmp ah,50h		;Compara si la tecla pulsada es la flecha de abajo, si es asi salta a flecha abajo
+			je flecha_abajo
+			
+			cmp ah,4bh		;Compara si la tecla pulsada es la flecha de la izquierda, si es asi salta a flecha  izquierda
+			je flecha_izquierda
+			
+			cmp ah,4dh		;Compara si la tecla pulsada es la flecha de  la derecha, si es asi salta a flecha derecha
+			je flecha_derecha
+			
+			cmp ah,48h		;Compara si la tecla pulsada es la flecha de arriba, si es asi salta a flecha arriba
+			je flecha_arriba
+			
+			jmp leer_caracter		;Si no es ninguna de la anteriores salta a leer caracter
+			
+;		;-----------------------------------------------------------------
+
+		flecha_derecha:
+			mov ah,02h		;peticion para colocar el cursor
+			
+			cmp dl,4Fh		;Si el cursor ha llegado hasta la columna 79( ultima) salta a detener_cursor_a_la_derecha
+			je detener_cursor_a_la_derecha
+			
+			inc dl			;Ya que el movimiento del cursor  es hacia la derecha incrementa  el valor de la columna en 1
+			int 10h
+			jmp leer_caracter		;Salta a leer caracter  
+		
+		
+		detener_cursor_a_la_derecha:
+			mov dl,4Fh		
+			int 10h
+			jmp leer_caracter
+		
+		;-----------------------------------------------------------------
+		
+		flecha_izquierda:
+			mov ah,02h		;peticion para colocar el cursor
+			
+			cmp dl,00h		;Si el cursor ha llegado hasta la columna 00( primera)  salta a detener_cursor_a_la_izquierda
+			je detener_cursor_a_la_izquierda
+			
+			dec dl    		;Ya que el movimiento del cursor  es hacia la izquierda decrementa el valor de la columna en 1
+			int 10h
+			jmp leer_caracter		;Salta a leer caracter  
+		
+		
+		detener_cursor_a_la_izquierda:
+			mov dl,00h
+			int 10h
+			jmp leer_caracter
+			
+		;-----------------------------------------------------------------
+		
+		flecha_arriba:
+			mov ah,02h		;peticion para colocar el cursor
+			
+			cmp dh,00h		;Si el cursor ha llegado hasta el renglon  00( primera)  salta a detener_cursor_arriba
+			je detener_cursor_arriba
+			
+			dec dh			;Ya que el movimiento del cursor  es hacia arriba decrementa el valor del renglon en 1
+			int 10h
+			jmp leer_caracter		;Salta a leer caracter   
+		
+		detener_cursor_arriba:
+			mov dh,00h
+			int 10h
+			jmp leer_caracter
+			
+		;-----------------------------------------------------------------
+		
+		flecha_abajo:
+			mov ah,02h		;peticion para colocar el cursor
+			
+			cmp dh,18h		;Si el cursor ha llegado hasta el renglon  18( ultimo)  salta a detener_cursor_abajo
+			je mover_flecha_abajo
+			
+			inc dh			;Ya que el movimiento del cursor  es hacia abajo incrementa  el valor del renglon en 1
+			int 10h
+			jmp leer_caracter		;Salta a leer caracter   
+		
+		mover_flecha_abajo:
+			mov dh,18h
+			int 10h			
+			jmp leer_caracter
+			
+		;-----------------------------------------------------------------
+			
+		main endp
+	codesg ends
+	end main
+end
